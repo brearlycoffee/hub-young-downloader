@@ -4,7 +4,7 @@ Download books pages from HUB Young software.
 
 **[ITALIANO]**
 
-**_NOTA: Al momento il programma permette di scaricare le pagine dei tuoi libri senza riordinarle._**
+**_NOTA: Al momento il programma permette di scaricare le pagine dei tuoi libri senza riordinarle e senza creare il file PDF._**
 
 HUB Young Downloader è un programma che permette di scaricare le pagine dei libri scaricati offline dal software HUB Young.<br>
 L'obiettivo è poter creare dei file PDF dei libri ma al momento questa funzionalità non è disponibile.
@@ -18,7 +18,7 @@ L'obiettivo è poter creare dei file PDF dei libri ma al momento questa funziona
 **_Requisiti:_**
 <ul>
   <li>Python 3.x &nbsp; &nbsp; https://www.python.org/downloads/</li>
-  <li>HUB Young https://www.rizzolieducation.it/digitale/scarica-hub-kids-e-hub-young/</li>
+  <li>HUB Young &nbsp; &nbsp; https://www.rizzolieducation.it/digitale/scarica-hub-kids-e-hub-young/</li>
 </ul>
 
 **_Come utilizzare il programma:_**
