@@ -20,9 +20,10 @@ minheight = 1000
 book_path = "C:\\Users\\"+osuser+"\\AppData\\Local\\HUB young\\"
 ##########################################################################
 
-print("\nMEBook Ripper")
+print("\nMEBook Image Downloader")
 print("(C) brearlycoffee.cf")
 
+# list all directories in path
 book_list = [dI for dI in os.listdir(book_path) if os.path.isdir(os.path.join(book_path,dI))]
 print("\n[Your library - About",str(len(book_list)),"books found]")
 for i in range(len(book_list)):
@@ -49,6 +50,8 @@ book_path = book_path +codein+"\\"
 out_path = out_path + codein+"\\"
 os.mkdir(out_path)
 
+# publication directory may contain images named like others files in other directories
+# so i'm moving the folder and then restoring it.
 print("Moving publication directory...")     
 try:  
     shutil.move(book_path+"publication","C:\\Users\\user\\AppData\\Local\\HUB young\\")
@@ -68,11 +71,12 @@ for root, dirs, files in os.walk(book_path):
         except:
             pass
         else: 
+            # acquisiring width and height of every image
             width, height = page.size
             if width >= minwidth and height >= minheight:
                 try:
                     shutil.copy2(path_file,out_path)
-                except:
+                except: # the file is not an image
                     pass
                 else:
                     count+=1
