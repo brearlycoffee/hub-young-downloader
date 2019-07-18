@@ -2,6 +2,8 @@ import os
 import shutil
 from PIL import Image, ImageOps
 import cv2 as cv
+import pytesseract
+import re 
 
 ##########################################################################
 # CUSTOM SETTINGS: edit this BEFORE running the program.
@@ -9,11 +11,14 @@ import cv2 as cv
 # 1. Specify your operating system user name
 osuser = "user" # <-- edit this
 
-# 2. (OPTIONAL) Edit the output path.
+# 2. Specify Tesseract path
+pytesseract.pytesseract.tesseract_cmd = "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+
+# 3. (OPTIONAL) Edit the output path.
 #    REMEMBER TO ADD ANOTHER BACKSLASH (\)
 out_path = "C:\\Users\\"+osuser+"\\Desktop\\"
 
-# 3. (OPTIONAL) Edit minimum width and height of images
+# 4. (OPTIONAL) Edit minimum width and height of images
 minwidth = 1000
 minheight = 1000
 
@@ -92,16 +97,15 @@ for root, dirs, files in os.walk(book_path):
 if count == 0:
     print("The directory does not contain any good resolution images.")
 else:
-    print("All pages copied.")
+    print(str(count)+" pages copied.")
 print("\nRestoring publication directory...")
 try:  
     shutil.move("C:\\Users\\user\\AppData\\Local\\HUB young\\publication",book_path)
 except:
     print("Failed!")
-else:
-    print("Done.")
-
-print("\nApplying borders to pages...")
+    
+print("\nProcessing images (renaming + applying borders)...")
+print("WARNING: These actions require several minutes, please wait...")
 print("Page size: "+str(maxwidth)+" x "+str(maxheight))
 WHITE = [255,255,255]
 
@@ -112,13 +116,39 @@ for i in range(len(imagelist)):
     # imagelist[i] now contains the full path.
     imagelist[i] = out_path+imagelist[i]
     try:
-        page = Image.open(imagelist[i])
+        page = cv.imread(imagelist[i])
     except: # the file is not an image
         pass
     else:
-        width, height = page.size
+        height, width, channels = page.shape
         
-        # calculating borders
+        #RENAMING---------------------------------------------------------------------------------
+        pagepart = page[(height-100):height, 0:width]   # crop 100px from bottom
+        cv.imwrite(out_path+"pagepart.jpg",pagepart)    # create new image called pagepart.jpg
+        # ocr scan pagepart.jpg
+        pagedata = pytesseract.image_to_string(Image.open(out_path+"pagepart.jpg"))
+        # detect all numbers
+        pageids = re.findall(r'\d+', pagedata)
+        
+        if len(pageids) == 1:           # 1 number found (probably page number)
+            maxid = int(pageids[0])
+            idstr = (len(str(count))-len(str(maxid)))*"0"+str(maxid)
+            shutil.move(out_path+name, out_path+idstr+".jpg")
+        elif len(pageids) >= 2:         # 2+ numbers found (probably page number and chapter)
+            maxid = 0
+            for j in range(len(pageids)):
+                
+                # for example:
+                # if pageids = ['135' , '2']
+                # '135' is the page number
+                # '2' is the chapter
+                # so the biggest number (135) is the page number.
+                if int(pageids[j]) > maxid and int(pageids[j]) <= count:
+                    maxid = int(pageids[j])
+            idstr = (len(str(count))-len(str(maxid)))*"0"+str(maxid)
+            shutil.move(out_path+name, out_path+idstr+".jpg")
+        
+        #APPLYING  BORDERS----------------------------------------------------------------
         top = int((maxheight-height)/2)
         bottom = top
         if (maxheight-height)%2 != 0:
@@ -133,6 +163,11 @@ for i in range(len(imagelist)):
             dst = cv.copyMakeBorder(src, top, bottom, left, right, cv.BORDER_REPLICATE, None, WHITE)
             #dst = cv.copyMakeBorder(src, top, bottom, left, right, cv.BORDER_CONSTANT, None, WHITE)
             cv.imwrite(out_path+name,dst)
+print("File renaming (almost) completed.")
+               
+print("\nDeleting pagepart.jpg file...")
+os.remove(out_path+"pagepart.jpg")
 
-print("Done. Check: "+out_path)
+print("\nDone. Check: "+out_path)
+print("I suggest you to check pages numbers.\nIf you find any mistakes, please manually rename them.")
 
