@@ -64,7 +64,7 @@ os.mkdir(out_path)
 # so i'm moving the folder and then restoring it.
 print("Moving publication directory...")     
 try:  
-    shutil.move(book_path+"publication","C:\\Users\\user\\AppData\\Local\\HUB young\\")
+    shutil.move(book_path+"publication","C:\\Users\\"+osuser+"\\AppData\\Local\\HUB young\\")
 except:
     pass
 
@@ -104,7 +104,7 @@ else:
     print(str(count)+" pages copied.")
 print("\nRestoring publication directory...")
 try:  
-    shutil.move("C:\\Users\\user\\AppData\\Local\\HUB young\\publication",book_path)
+    shutil.move("C:\\Users\\"+osuser+"\\AppData\\Local\\HUB young\\publication",book_path)
 except:
     print("Failed!")
     
