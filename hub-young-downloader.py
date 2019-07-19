@@ -14,7 +14,7 @@ osuser = "user" # <-- edit this
 # 2. Specify Tesseract path
 pytesseract.pytesseract.tesseract_cmd = "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
 
-# 3. Search for page numbers in the last(DEFAULT)/first ?px
+# 3. (OPTIONAL) Search for page numbers in the last(DEFAULT)/first ?px
 bottom_search = True
 px_search = 100
 
