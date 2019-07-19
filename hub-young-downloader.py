@@ -30,7 +30,7 @@ minheight = 1000
 book_path = "C:\\Users\\"+osuser+"\\AppData\\Local\\HUB young\\"
 ##########################################################################
 
-print("\nMEBook Image Downloader")
+print("\nHUB Young Downloader")
 print("(C) brearlycoffee.cf")
 
 # list all directories in path
