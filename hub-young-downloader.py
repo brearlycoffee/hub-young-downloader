@@ -14,11 +14,15 @@ osuser = "user" # <-- edit this
 # 2. Specify Tesseract path
 pytesseract.pytesseract.tesseract_cmd = "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
 
-# 3. (OPTIONAL) Edit the output path.
+# 3. Search for page numbers in the last(DEFAULT)/first ?px
+bottom_search = True
+px_search = 100
+
+# 4. (OPTIONAL) Edit the output path.
 #    REMEMBER TO ADD ANOTHER BACKSLASH (\)
 out_path = "C:\\Users\\"+osuser+"\\Desktop\\"
 
-# 4. (OPTIONAL) Edit minimum width and height of images
+# 5. (OPTIONAL) Edit minimum width and height of images
 minwidth = 1000
 minheight = 1000
 
@@ -115,54 +119,60 @@ for i in range(len(imagelist)):
     name = imagelist[i]
     # imagelist[i] now contains the full path.
     imagelist[i] = out_path+imagelist[i]
-    try:
-        page = cv.imread(imagelist[i])
-    except: # the file is not an image
-        pass
+    
+    page = cv.imread(imagelist[i])
+    height, width, channels = page.shape
+    
+    #RENAMING---------------------------------------------------------------------------------
+    if bottom_search == True:
+        pagepart = page[(height-px_search):height, 0:width]   # crop 100px from bottom
     else:
-        height, width, channels = page.shape
+        pagepart = page[0:px_search, 0:width]                 # crop 100px from top
+    cv.imwrite(out_path+"pagepart.jpg",pagepart)    # create new image called pagepart.jpg
+    
+    '''
+    imagepart = cv.imread(out_path+"pagepart.jpg")
+    gray_imagepart = cv.cvtColor(imagepart, cv.COLOR_BGR2GRAY)
+    cv.imwrite(out_path+"pagepart.jpg",gray_imagepart)
+    '''
+    # ocr scan pagepart.jpg
+    pagedata = pytesseract.image_to_string(Image.open(out_path+"pagepart.jpg"))
+    # detect all numbers
+    pageids = re.findall(r'\d+', pagedata)
+    
+    if len(pageids) == 1:           # 1 number found (probably page number)
+        maxid = int(pageids[0])
+        idstr = (len(str(count))-len(str(maxid)))*"0"+str(maxid)
+        shutil.move(out_path+name, out_path+idstr+".jpg")
+    elif len(pageids) >= 2:         # 2+ numbers found (probably page number and chapter)
+        maxid = 0
+        for j in range(len(pageids)):
+            
+            # for example:
+            # if pageids = ['135' , '2']
+            # '135' is the page number
+            # '2' is the chapter
+            # so the biggest number (135) is the page number.
+            if int(pageids[j]) > maxid and int(pageids[j]) <= count:
+                maxid = int(pageids[j])
         
-        #RENAMING---------------------------------------------------------------------------------
-        pagepart = page[(height-100):height, 0:width]   # crop 100px from bottom
-        cv.imwrite(out_path+"pagepart.jpg",pagepart)    # create new image called pagepart.jpg
-        # ocr scan pagepart.jpg
-        pagedata = pytesseract.image_to_string(Image.open(out_path+"pagepart.jpg"))
-        # detect all numbers
-        pageids = re.findall(r'\d+', pagedata)
-        
-        if len(pageids) == 1:           # 1 number found (probably page number)
-            maxid = int(pageids[0])
-            idstr = (len(str(count))-len(str(maxid)))*"0"+str(maxid)
-            shutil.move(out_path+name, out_path+idstr+".jpg")
-        elif len(pageids) >= 2:         # 2+ numbers found (probably page number and chapter)
-            maxid = 0
-            for j in range(len(pageids)):
-                
-                # for example:
-                # if pageids = ['135' , '2']
-                # '135' is the page number
-                # '2' is the chapter
-                # so the biggest number (135) is the page number.
-                if int(pageids[j]) > maxid and int(pageids[j]) <= count:
-                    maxid = int(pageids[j])
-            idstr = (len(str(count))-len(str(maxid)))*"0"+str(maxid)
-            shutil.move(out_path+name, out_path+idstr+".jpg")
-        
-        #APPLYING  BORDERS----------------------------------------------------------------
-        top = int((maxheight-height)/2)
-        bottom = top
-        if (maxheight-height)%2 != 0:
-            top +=1
-        left = int((maxwidth-width)/2)
-        right = left
-        if (maxwidth-width)%2 != 0:
-            left +=1
-        
-        if top != 0 or bottom != 0 or left != 0 or right != 0:   
-            src = cv.imread(cv.samples.findFile(imagelist[i]), cv.IMREAD_COLOR)
-            dst = cv.copyMakeBorder(src, top, bottom, left, right, cv.BORDER_REPLICATE, None, WHITE)
-            #dst = cv.copyMakeBorder(src, top, bottom, left, right, cv.BORDER_CONSTANT, None, WHITE)
-            cv.imwrite(out_path+name,dst)
+        idstr = (len(str(count))-len(str(maxid)))*"0"+str(maxid)
+        shutil.move(out_path+name, out_path+idstr+".jpg")
+    
+    #APPLYING  BORDERS----------------------------------------------------------------
+    top = int((maxheight-height)/2)
+    bottom = top
+    if (maxheight-height)%2 != 0:
+        top +=1
+    left = int((maxwidth-width)/2)
+    right = left
+    if (maxwidth-width)%2 != 0:
+        left +=1
+    
+    if top != 0 or bottom != 0 or left != 0 or right != 0:   
+        dst = cv.copyMakeBorder(page, top, bottom, left, right, cv.BORDER_REPLICATE, None, WHITE)
+        #dst = cv.copyMakeBorder(src, top, bottom, left, right, cv.BORDER_CONSTANT, None, WHITE)
+        cv.imwrite(out_path+name,dst)
 print("File renaming (almost) completed.")
                
 print("\nDeleting pagepart.jpg file...")
