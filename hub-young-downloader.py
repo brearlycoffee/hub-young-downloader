@@ -3,7 +3,8 @@ import shutil
 from PIL import Image, ImageOps
 import cv2 as cv
 import pytesseract
-import re 
+import re
+import sys
 
 ##########################################################################
 # CUSTOM SETTINGS: edit this BEFORE running the program.
@@ -14,7 +15,7 @@ osuser = "user" # <-- edit this
 # 2. Specify Tesseract path
 pytesseract.pytesseract.tesseract_cmd = "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
 
-# 3. (OPTIONAL) Search for page numbers in the last(DEFAULT)/first ?px
+# 3. Search for page numbers in the last(DEFAULT)/first ?px
 bottom_search = True
 px_search = 100
 
@@ -30,7 +31,7 @@ minheight = 1000
 book_path = "C:\\Users\\"+osuser+"\\AppData\\Local\\HUB young\\"
 ##########################################################################
 
-print("\nHUB Young Downloader")
+print("\nMEBook Image Downloader")
 print("(C) brearlycoffee.cf")
 
 # list all directories in path
@@ -58,13 +59,17 @@ while notvalid:
 
 book_path = book_path + codein + "\\"
 out_path = out_path + codein + "\\"
-os.mkdir(out_path)
+try:
+    os.mkdir(out_path)
+except OSError:
+    print("ERROR: Unable to create directory or directory already exists!")
+    sys.exit(0)
 
 # publication directory may contain images named like others files in other directories
 # so i'm moving the folder and then restoring it.
 print("Moving publication directory...")     
 try:  
-    shutil.move(book_path+"publication","C:\\Users\\"+osuser+"\\AppData\\Local\\HUB young\\")
+    shutil.move(book_path+"publication","C:\\Users\\user\\AppData\\Local\\HUB young\\")
 except:
     pass
 
@@ -104,7 +109,7 @@ else:
     print(str(count)+" pages copied.")
 print("\nRestoring publication directory...")
 try:  
-    shutil.move("C:\\Users\\"+osuser+"\\AppData\\Local\\HUB young\\publication",book_path)
+    shutil.move("C:\\Users\\user\\AppData\\Local\\HUB young\\publication",book_path)
 except:
     print("Failed!")
     
@@ -117,6 +122,7 @@ imagelist = os.listdir(out_path)
 for i in range(len(imagelist)):
     # stored image name
     name = imagelist[i]
+    newname = imagelist[i]
     # imagelist[i] now contains the full path.
     imagelist[i] = out_path+imagelist[i]
     
@@ -142,8 +148,8 @@ for i in range(len(imagelist)):
     
     if len(pageids) == 1:           # 1 number found (probably page number)
         maxid = int(pageids[0])
-        idstr = (len(str(count))-len(str(maxid)))*"0"+str(maxid)
-        shutil.move(out_path+name, out_path+idstr+".jpg")
+        newname = (len(str(count))-len(str(maxid)))*"0"+str(maxid)+".jpg"
+        shutil.move(out_path+name, out_path+newname)
     elif len(pageids) >= 2:         # 2+ numbers found (probably page number and chapter)
         maxid = 0
         for j in range(len(pageids)):
@@ -156,8 +162,8 @@ for i in range(len(imagelist)):
             if int(pageids[j]) > maxid and int(pageids[j]) <= count:
                 maxid = int(pageids[j])
         
-        idstr = (len(str(count))-len(str(maxid)))*"0"+str(maxid)
-        shutil.move(out_path+name, out_path+idstr+".jpg")
+        newname = (len(str(count))-len(str(maxid)))*"0"+str(maxid)+".jpg"
+        shutil.move(out_path+name, out_path+newname)
     
     #APPLYING  BORDERS----------------------------------------------------------------
     top = int((maxheight-height)/2)
@@ -170,9 +176,9 @@ for i in range(len(imagelist)):
         left +=1
     
     if top != 0 or bottom != 0 or left != 0 or right != 0:   
-        dst = cv.copyMakeBorder(page, top, bottom, left, right, cv.BORDER_REPLICATE, None, WHITE)
-        #dst = cv.copyMakeBorder(src, top, bottom, left, right, cv.BORDER_CONSTANT, None, WHITE)
-        cv.imwrite(out_path+name,dst)
+        borders = cv.copyMakeBorder(page, top, bottom, left, right, cv.BORDER_REPLICATE, None, WHITE)
+        #border = cv.copyMakeBorder(src, top, bottom, left, right, cv.BORDER_CONSTANT, None, WHITE)
+        cv.imwrite(out_path+newname,borders)
 print("File renaming (almost) completed.")
                
 print("\nDeleting pagepart.jpg file...")
@@ -180,4 +186,3 @@ os.remove(out_path+"pagepart.jpg")
 
 print("\nDone. Check: "+out_path)
 print("I suggest you to check pages numbers.\nIf you find any mistakes, please manually rename them.")
-
