@@ -2,7 +2,7 @@
 Scarica le immagini delle pagine dei tuoi libri dal software HUB Young.<br>
 Download books pages from HUB Young software.
 
-**[ITALIANO]**
+:it:
 
 **_NOTA: Al momento il programma permette di scaricare le pagine dei tuoi libri senza riordinarle e senza creare il file PDF._**
 
