@@ -13,22 +13,21 @@ import sys
 osuser = "user" # <-- edit this
 
 # 2. Specify Tesseract path
-pytesseract.pytesseract.tesseract_cmd = "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
 
-# 3. Search for page numbers in the last(DEFAULT)/first ?px
+# 3. (OPTIONAL) Search for page numbers in the last(DEFAULT)/first ?px
 bottom_search = True
 px_search = 100
 
 # 4. (OPTIONAL) Edit the output path.
-#    REMEMBER TO ADD ANOTHER BACKSLASH (\)
-out_path = "C:\\Users\\"+osuser+"\\Desktop\\"
+out_path = "C:/Users/"+osuser+"/Desktop/"
 
 # 5. (OPTIONAL) Edit minimum width and height of images
 minwidth = 1000
 minheight = 1000
 
 # DO NOT EDIT THIS PATH
-book_path = "C:\\Users\\"+osuser+"\\AppData\\Local\\HUB young\\"
+book_path = "C:/Users/"+osuser+"/AppData/Local/HUB young/"
 ##########################################################################
 
 print("\nMEBook Image Downloader")
@@ -57,8 +56,8 @@ while notvalid:
     else:
         print("Insert a valid book directory.")
 
-book_path = book_path + codein + "\\"
-out_path = out_path + codein + "\\"
+book_path = book_path + codein + "/"
+out_path = out_path + codein + "/"
 try:
     os.mkdir(out_path)
 except OSError:
@@ -69,7 +68,7 @@ except OSError:
 # so i'm moving the folder and then restoring it.
 print("Moving publication directory...")     
 try:  
-    shutil.move(book_path+"publication","C:\\Users\\user\\AppData\\Local\\HUB young\\")
+    shutil.move(book_path+"publication","C:/Users/"+osuser+"/AppData/Local/HUB young/")
 except:
     pass
 
@@ -90,7 +89,7 @@ for root, dirs, files in os.walk(book_path):
         else: 
             # acquiring width and height of every image
             width, height = page.size
-            if width >= minwidth and height >= minheight:
+            if (width >= minwidth and height >= minheight) or (width >= 700 and height >= minheight+500) :
                 if width > maxwidth:
                     maxwidth = width
                 if height > maxheight:
@@ -109,11 +108,11 @@ else:
     print(str(count)+" pages copied.")
 print("\nRestoring publication directory...")
 try:  
-    shutil.move("C:\\Users\\user\\AppData\\Local\\HUB young\\publication",book_path)
+    shutil.move("C:/Users/"+osuser+"/AppData/Local/HUB young/publication",book_path)
 except:
     print("Failed!")
     
-print("\nProcessing images (renaming + applying borders)...")
+print("\nProcessing images (renaming and applying borders)...")
 print("WARNING: These actions require several minutes, please wait...")
 print("Page size: "+str(maxwidth)+" x "+str(maxheight))
 WHITE = [255,255,255]
@@ -135,7 +134,6 @@ for i in range(len(imagelist)):
     else:
         pagepart = page[0:px_search, 0:width]                 # crop 100px from top
     cv.imwrite(out_path+"pagepart.jpg",pagepart)    # create new image called pagepart.jpg
-    
     '''
     imagepart = cv.imread(out_path+"pagepart.jpg")
     gray_imagepart = cv.cvtColor(imagepart, cv.COLOR_BGR2GRAY)
