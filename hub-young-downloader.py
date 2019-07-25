@@ -12,17 +12,10 @@ import sys
 # 1. Specify your operating system user name
 osuser = "user" # <-- edit this
 
-# 2. Specify Tesseract path
-pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
-
-# 3. (OPTIONAL) Search for page numbers in the last(DEFAULT)/first ?px
-bottom_search = True
-px_search = 100
-
-# 4. (OPTIONAL) Edit the output path.
+# 2. (OPTIONAL) Edit the output path.
 out_path = "C:/Users/"+osuser+"/Desktop/"
 
-# 5. (OPTIONAL) Edit minimum width and height of images
+# 3. (OPTIONAL) Edit minimum width and height of images
 minwidth = 1000
 minheight = 1000
 
@@ -112,7 +105,7 @@ try:
 except:
     print("Failed!")
     
-print("\nProcessing images (renaming and applying borders)...")
+print("\nProcessing images (applying borders)...")
 print("WARNING: These actions require several minutes, please wait...")
 print("Page size: "+str(maxwidth)+" x "+str(maxheight))
 WHITE = [255,255,255]
@@ -127,41 +120,6 @@ for i in range(len(imagelist)):
     
     page = cv.imread(imagelist[i])
     height, width, channels = page.shape
-    
-    #RENAMING---------------------------------------------------------------------------------
-    if bottom_search == True:
-        pagepart = page[(height-px_search):height, 0:width]   # crop 100px from bottom
-    else:
-        pagepart = page[0:px_search, 0:width]                 # crop 100px from top
-    cv.imwrite(out_path+"pagepart.jpg",pagepart)    # create new image called pagepart.jpg
-    '''
-    imagepart = cv.imread(out_path+"pagepart.jpg")
-    gray_imagepart = cv.cvtColor(imagepart, cv.COLOR_BGR2GRAY)
-    cv.imwrite(out_path+"pagepart.jpg",gray_imagepart)
-    '''
-    # ocr scan pagepart.jpg
-    pagedata = pytesseract.image_to_string(Image.open(out_path+"pagepart.jpg"))
-    # detect all numbers
-    pageids = re.findall(r'\d+', pagedata)
-    
-    if len(pageids) == 1:           # 1 number found (probably page number)
-        maxid = int(pageids[0])
-        newname = (len(str(count))-len(str(maxid)))*"0"+str(maxid)+".jpg"
-        shutil.move(out_path+name, out_path+newname)
-    elif len(pageids) >= 2:         # 2+ numbers found (probably page number and chapter)
-        maxid = 0
-        for j in range(len(pageids)):
-            
-            # for example:
-            # if pageids = ['135' , '2']
-            # '135' is the page number
-            # '2' is the chapter
-            # so the biggest number (135) is the page number.
-            if int(pageids[j]) > maxid and int(pageids[j]) <= count:
-                maxid = int(pageids[j])
-        
-        newname = (len(str(count))-len(str(maxid)))*"0"+str(maxid)+".jpg"
-        shutil.move(out_path+name, out_path+newname)
     
     #APPLYING  BORDERS----------------------------------------------------------------
     top = int((maxheight-height)/2)
@@ -183,4 +141,4 @@ print("\nDeleting pagepart.jpg file...")
 os.remove(out_path+"pagepart.jpg")
 
 print("\nDone. Check: "+out_path)
-print("I suggest you to check pages numbers.\nIf you find any mistakes, please manually rename them.")
+print("Downloaded pages are not renamed. Please open the image, check page number and rename it.")
