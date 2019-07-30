@@ -20,7 +20,6 @@ HUB Young Downloader è un programma che permette di scaricare le pagine dei lib
   <li>Python 3.x &nbsp; &nbsp; https://www.python.org/downloads/</li>
   <li>HUB Young &nbsp; &nbsp; https://www.rizzolieducation.it/digitale/scarica-hub-kids-e-hub-young/</li>
   <li>OpenCV &nbsp; &nbsp; <code>pip install opencv-python</code></li>
-  <li>Python-tesseract &nbsp; &nbsp; <code>pip install pytesseract</code></li>
 </ul>
 
 **_Come utilizzare il programma:_**
