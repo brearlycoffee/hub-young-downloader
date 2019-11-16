@@ -135,10 +135,6 @@ for i in range(len(imagelist)):
         borders = cv.copyMakeBorder(page, top, bottom, left, right, cv.BORDER_REPLICATE, None, WHITE)
         #border = cv.copyMakeBorder(src, top, bottom, left, right, cv.BORDER_CONSTANT, None, WHITE)
         cv.imwrite(out_path+newname,borders)
-print("File renaming (almost) completed.")
-               
-print("\nDeleting pagepart.jpg file...")
-os.remove(out_path+"pagepart.jpg")
 
 print("\nDone. Check: "+out_path)
 print("Downloaded pages are not renamed. Please open the image, check page number and rename it.")
